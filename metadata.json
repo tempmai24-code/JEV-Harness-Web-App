@@ -1,0 +1,6 @@
+{
+  "name": "JEV Flash Arbitrage Harness",
+  "description": "High-frequency Aave V3 flash loan arbitrage harness on Arbitrum One powered by TypeSafe AI JEV System-One probabilistic gatekeeper and Arkham/Nansen feeds.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
