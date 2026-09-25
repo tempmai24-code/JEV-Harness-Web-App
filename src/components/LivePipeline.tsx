@@ -3,6 +3,7 @@ import { ArbitrageOpportunity } from '../types/arbitrage';
 import { SCENARIO_PRESETS, AAVE_V3_ARBITRUM_POOL_ADDRESS } from '../data/mockData';
 import { JevEngineService } from '../services/jevEngine';
 import { STANDARD_JEV_QUESTIONS } from '../data/mockData';
+import { WalletState } from '../services/walletService';
 import { 
   Play, 
   Pause, 
@@ -15,15 +16,27 @@ import {
   ChevronRight, 
   ArrowUpRight,
   ExternalLink,
-  Code
+  Code,
+  Wallet,
+  Cpu,
+  Eye,
+  Activity,
+  Server
 } from 'lucide-react';
 
 interface LivePipelineProps {
   onSelectForJev: (opp: ArbitrageOpportunity) => void;
   onOpenCode: () => void;
+  onOpenApiModal?: () => void;
+  walletState?: WalletState;
 }
 
-export const LivePipeline: React.FC<LivePipelineProps> = ({ onSelectForJev, onOpenCode }) => {
+export const LivePipeline: React.FC<LivePipelineProps> = ({ 
+  onSelectForJev, 
+  onOpenCode,
+  onOpenApiModal,
+  walletState
+}) => {
   const [isStreaming, setIsStreaming] = useState(true);
   const [blockNumber, setBlockNumber] = useState(214839210);
   const [opportunities, setOpportunities] = useState<ArbitrageOpportunity[]>([]);
@@ -297,6 +310,56 @@ export const LivePipeline: React.FC<LivePipelineProps> = ({ onSelectForJev, onOp
 
   return (
     <div className="space-y-6">
+      {/* API & Wallet Integration Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 bg-slate-900/90 border border-slate-800 rounded-lg text-xs">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 font-semibold text-slate-200">
+            <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span>API Bindings:</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded border border-slate-800/80">
+            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-slate-300">JEV System-One:</span>
+            <span className="text-emerald-400 font-mono font-medium">Bound</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded border border-slate-800/80">
+            <Eye className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-slate-300">Arkham Intel:</span>
+            <span className="text-emerald-400 font-mono font-medium">Bound</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded border border-slate-800/80">
+            <Activity className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-slate-300">Nansen Flow:</span>
+            <span className="text-emerald-400 font-mono font-medium">Bound</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded border border-slate-800/80">
+            <Wallet className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-slate-300">Wallet:</span>
+            {walletState?.isConnected ? (
+              <span className="text-emerald-400 font-mono font-medium">
+                {walletState.address?.slice(0, 4)}...{walletState.address?.slice(-3)} ({walletState.balanceEth} ETH)
+              </span>
+            ) : (
+              <span className="text-amber-400 font-mono">Unbound</span>
+            )}
+          </div>
+        </div>
+
+        {onOpenApiModal && (
+          <button
+            onClick={onOpenApiModal}
+            className="flex items-center justify-center gap-1.5 px-3 py-1 bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-700/80 text-cyan-300 rounded font-medium transition-colors whitespace-nowrap"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>Manage Bindings</span>
+          </button>
+        )}
+      </div>
+
       {/* Real-time Telemetry & Key Invariants Ribbon */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div className="p-3.5 bg-slate-900/80 border border-slate-800 rounded-lg">
@@ -342,8 +405,8 @@ export const LivePipeline: React.FC<LivePipelineProps> = ({ onSelectForJev, onOp
       </div>
 
       {/* Stream Controls & Injection Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <button
             onClick={() => setIsStreaming(!isStreaming)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
@@ -388,28 +451,28 @@ export const LivePipeline: React.FC<LivePipelineProps> = ({ onSelectForJev, onOp
         </div>
 
         {/* Live Scenario Injectors */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <span className="text-[11px] text-slate-400 hidden xl:inline">Simulate Dislocation:</span>
           <button
             onClick={() => injectScenario(0)}
-            className="px-2.5 py-1 text-xs font-medium text-emerald-300 bg-emerald-950/60 border border-emerald-800/80 rounded hover:bg-emerald-900/60 transition-colors flex items-center gap-1"
+            className="px-2 py-1 text-xs font-medium text-emerald-300 bg-emerald-950/60 border border-emerald-800/80 rounded hover:bg-emerald-900/60 transition-colors flex items-center gap-1"
           >
             <ShieldCheck className="w-3 h-3 text-emerald-400" />
             <span>Clean Dislocation</span>
           </button>
           <button
             onClick={() => injectScenario(1)}
-            className="px-2.5 py-1 text-xs font-medium text-amber-300 bg-amber-950/60 border border-amber-800/80 rounded hover:bg-amber-900/60 transition-colors flex items-center gap-1"
+            className="px-2 py-1 text-xs font-medium text-amber-300 bg-amber-950/60 border border-amber-800/80 rounded hover:bg-amber-900/60 transition-colors flex items-center gap-1"
           >
             <AlertTriangle className="w-3 h-3 text-amber-400" />
-            <span>MEV Bot Sandwich</span>
+            <span>MEV Sandwich</span>
           </button>
           <button
             onClick={() => injectScenario(2)}
-            className="px-2.5 py-1 text-xs font-medium text-rose-300 bg-rose-950/60 border border-rose-800/80 rounded hover:bg-rose-900/60 transition-colors flex items-center gap-1"
+            className="px-2 py-1 text-xs font-medium text-rose-300 bg-rose-950/60 border border-rose-800/80 rounded hover:bg-rose-900/60 transition-colors flex items-center gap-1"
           >
             <Flame className="w-3 h-3 text-rose-400" />
-            <span>Fee Exhaustion Trap</span>
+            <span>Fee Trap</span>
           </button>
         </div>
       </div>

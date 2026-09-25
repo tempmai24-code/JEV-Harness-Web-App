@@ -11,13 +11,28 @@ import { ProfitCalculator } from './components/ProfitCalculator';
 import { CodeStudio } from './components/CodeStudio';
 import { ArchitectureDocs } from './components/ArchitectureDocs';
 import { ExportModal } from './components/ExportModal';
+import { ApiWalletBindingModal } from './components/ApiWalletBindingModal';
 import { ArbitrageOpportunity } from './types/arbitrage';
 import { AAVE_V3_ARBITRUM_POOL_ADDRESS } from './data/mockData';
+import { WalletState } from './services/walletService';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('pipeline');
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [isApiModalOpen, setIsApiModalOpen] = useState<boolean>(false);
   const [selectedOppForJev, setSelectedOppForJev] = useState<ArbitrageOpportunity | null>(null);
+
+  // Global Web3 Wallet Connection State
+  const [walletState, setWalletState] = useState<WalletState>({
+    isConnected: true,
+    address: '0x71C95911e9a5d330f4d621842EC243EE1343292e',
+    chainId: 42161,
+    networkName: 'Arbitrum One',
+    balanceEth: '2.4820',
+    isArbitrum: true,
+    providerType: 'simulated',
+    error: null
+  });
 
   const handleSelectForJev = (opp: ArbitrageOpportunity) => {
     setSelectedOppForJev(opp);
@@ -36,6 +51,8 @@ export default function App() {
         setActiveTab={setActiveTab}
         onQuickSimulate={handleQuickSimulate}
         onDownloadBundle={() => setIsExportModalOpen(true)}
+        onOpenApiModal={() => setIsApiModalOpen(true)}
+        walletState={walletState}
         isStreaming={true}
       />
 
@@ -45,6 +62,8 @@ export default function App() {
           <LivePipeline
             onSelectForJev={handleSelectForJev}
             onOpenCode={() => setActiveTab('code')}
+            onOpenApiModal={() => setIsApiModalOpen(true)}
+            walletState={walletState}
           />
         )}
 
@@ -78,10 +97,17 @@ export default function App() {
             <span>TypeSafe AI JEV System-One ($0.042/1M tokens)</span>
             <span aria-hidden="true">·</span>
             <button
-              onClick={() => setIsExportModalOpen(true)}
+              onClick={() => setIsApiModalOpen(true)}
               className="text-cyan-400 hover:text-cyan-300 transition-colors font-sans font-medium"
             >
-              Export Transcript & Bundle
+              API & Wallet Binding Hub
+            </button>
+            <span aria-hidden="true">·</span>
+            <button
+              onClick={() => setIsExportModalOpen(true)}
+              className="text-slate-400 hover:text-slate-200 transition-colors font-sans font-medium"
+            >
+              Export Bundle
             </button>
           </div>
         </div>
@@ -91,6 +117,14 @@ export default function App() {
       <ExportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
+      />
+
+      {/* API & Wallet Binding Hub Modal */}
+      <ApiWalletBindingModal
+        isOpen={isApiModalOpen}
+        onClose={() => setIsApiModalOpen(false)}
+        walletState={walletState}
+        setWalletState={setWalletState}
       />
     </div>
   );
