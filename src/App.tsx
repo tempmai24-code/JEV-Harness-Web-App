@@ -6,14 +6,16 @@
 import React, { useState } from 'react';
 import { TopBar, ActiveTab } from './components/TopBar';
 import { LivePipeline } from './components/LivePipeline';
+import { ExecutionHistory } from './components/ExecutionHistory';
 import { JevPlayground } from './components/JevPlayground';
 import { ProfitCalculator } from './components/ProfitCalculator';
 import { CodeStudio } from './components/CodeStudio';
 import { ArchitectureDocs } from './components/ArchitectureDocs';
 import { ExportModal } from './components/ExportModal';
 import { ApiWalletBindingModal } from './components/ApiWalletBindingModal';
-import { ArbitrageOpportunity } from './types/arbitrage';
+import { ArbitrageOpportunity, ExecutionRecord } from './types/arbitrage';
 import { AAVE_V3_ARBITRUM_POOL_ADDRESS } from './data/mockData';
+import { INITIAL_EXECUTION_HISTORY } from './data/mockHistory';
 import { WalletState } from './services/walletService';
 
 export default function App() {
@@ -21,6 +23,7 @@ export default function App() {
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isApiModalOpen, setIsApiModalOpen] = useState<boolean>(false);
   const [selectedOppForJev, setSelectedOppForJev] = useState<ArbitrageOpportunity | null>(null);
+  const [executionHistory, setExecutionHistory] = useState<ExecutionRecord[]>(INITIAL_EXECUTION_HISTORY);
 
   // Global Web3 Wallet Connection State
   const [walletState, setWalletState] = useState<WalletState>({
@@ -41,6 +44,10 @@ export default function App() {
 
   const handleQuickSimulate = () => {
     setActiveTab('jev');
+  };
+
+  const handleAddExecution = (record: ExecutionRecord) => {
+    setExecutionHistory((prev) => [record, ...prev]);
   };
 
   return (
@@ -64,6 +71,15 @@ export default function App() {
             onOpenCode={() => setActiveTab('code')}
             onOpenApiModal={() => setIsApiModalOpen(true)}
             walletState={walletState}
+            onRecordExecution={handleAddExecution}
+          />
+        )}
+
+        {activeTab === 'history' && (
+          <ExecutionHistory
+            history={executionHistory}
+            onAddExecution={handleAddExecution}
+            onOpenCode={() => setActiveTab('code')}
           />
         )}
 

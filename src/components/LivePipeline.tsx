@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArbitrageOpportunity } from '../types/arbitrage';
+import { ArbitrageOpportunity, ExecutionRecord } from '../types/arbitrage';
 import { SCENARIO_PRESETS, AAVE_V3_ARBITRUM_POOL_ADDRESS } from '../data/mockData';
 import { JevEngineService } from '../services/jevEngine';
 import { STANDARD_JEV_QUESTIONS } from '../data/mockData';
@@ -29,13 +29,15 @@ interface LivePipelineProps {
   onOpenCode: () => void;
   onOpenApiModal?: () => void;
   walletState?: WalletState;
+  onRecordExecution?: (record: ExecutionRecord) => void;
 }
 
 export const LivePipeline: React.FC<LivePipelineProps> = ({ 
   onSelectForJev, 
   onOpenCode,
   onOpenApiModal,
-  walletState
+  walletState,
+  onRecordExecution
 }) => {
   const [isStreaming, setIsStreaming] = useState(true);
   const [blockNumber, setBlockNumber] = useState(214839210);
@@ -302,6 +304,43 @@ export const LivePipeline: React.FC<LivePipelineProps> = ({
       setTotalProfit((prev) => prev + Math.round(net));
     } else {
       setGasSaved((prev) => prev + 50);
+    }
+
+    if (onRecordExecution) {
+      const isPassed = jevResp.decision.passed;
+      onRecordExecution({
+        id: 'exec-' + Date.now(),
+        timestamp: timeStr,
+        isoDate: now.toISOString(),
+        blockNumber: manualOpp.blockNumber,
+        outcome: isPassed ? 'SUCCESS' : 'FAIL',
+        outcomeReason: isPassed 
+          ? 'Pre-flight verified by JEV; clean Arbitrum Sequencer execution' 
+          : `Aborted by JEV gatekeeper: ${preset.arkhamContext.description}`,
+        tokenPair: preset.tokenPair,
+        tokenSymbol: preset.tokenPair.split(' / ')[0],
+        borrowAsset: preset.borrowAsset,
+        flashLoanAmountUsd: loanAmount,
+        buyExchange: preset.buyDex,
+        sellExchange: preset.sellDex,
+        buyPrice: 3240,
+        sellPrice: 3240 * (1 + preset.spreadPct / 100),
+        spreadPct: preset.spreadPct,
+        profitMarginPct: Number(((isPassed ? net : -(aaveFee * 0.5)) / loanAmount * 100).toFixed(3)),
+        grossRevenueUsd: Math.round(gross),
+        aaveFeeUsd: Math.round(aaveFee),
+        dexSwapFeeUsd: Math.round(dexSwap),
+        gasFeeUsd: 0.02,
+        netProfitUsd: isPassed ? Math.round(net) : Math.round(-(aaveFee * 0.5)),
+        txHash: manualOpp.txHash || `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
+        gasUsedUnits: 284000,
+        arkhamEntity: preset.arkhamContext.entity,
+        arkhamRisk: preset.expectedVerdict === 'PROCEED' ? 'LOW' : 'HIGH',
+        mempoolBots: preset.nansenContext.mempoolBots,
+        jevVerdict: isPassed ? 'PROCEED' : 'ABORT',
+        jevConfidence: Number((jevResp.decision.safetyScore / 5).toFixed(3)),
+        executionLatencyMs: jevResp.latencyMs || 18.5
+      });
     }
 
     setOpportunities((prev) => [manualOpp, ...prev.filter((o) => o.id !== manualOpp.id)]);

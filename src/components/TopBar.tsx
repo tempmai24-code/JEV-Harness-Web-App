@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Play, Download, Menu, X, Activity, Cpu, Calculator, Code2, BookOpen, Wallet, Zap } from 'lucide-react';
+import { Play, Download, Menu, X, Activity, Cpu, Calculator, Code2, BookOpen, Wallet, Zap, Clock } from 'lucide-react';
 import { WalletState } from '../services/walletService';
 
-export type ActiveTab = 'pipeline' | 'jev' | 'math' | 'code' | 'architecture';
+export type ActiveTab = 'pipeline' | 'history' | 'jev' | 'math' | 'code' | 'architecture';
 
 interface TopBarProps {
   activeTab: ActiveTab;
@@ -31,6 +31,13 @@ export const TopBar: React.FC<TopBarProps> = ({
       shortLabel: 'Pipeline',
       icon: <Activity className="w-4 h-4" />,
       desc: 'Real-time pool dislocation stream & mempool status'
+    },
+    {
+      id: 'history',
+      label: 'Execution History',
+      shortLabel: 'History',
+      icon: <Clock className="w-4 h-4" />,
+      desc: 'Audit log of past flash loan executions, profit margins & receipts'
     },
     {
       id: 'jev',

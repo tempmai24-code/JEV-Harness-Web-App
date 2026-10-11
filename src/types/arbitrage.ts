@@ -95,3 +95,37 @@ export interface NetworkProfile {
   jevSynergy: 'PERFECT' | 'GOOD' | 'POOR';
   synergyReason: string;
 }
+
+export type ExecutionOutcome = 'SUCCESS' | 'FAIL' | 'ABORTED';
+
+export interface ExecutionRecord {
+  id: string;
+  timestamp: string;
+  isoDate: string;
+  blockNumber: number;
+  outcome: ExecutionOutcome;
+  outcomeReason: string;
+  tokenPair: string;
+  tokenSymbol: string;
+  borrowAsset: string;
+  flashLoanAmountUsd: number;
+  buyExchange: string;
+  sellExchange: string;
+  buyPrice: number;
+  sellPrice: number;
+  spreadPct: number;
+  profitMarginPct: number; // Net Margin = (Net Profit / Loan Amount) * 100
+  grossRevenueUsd: number;
+  aaveFeeUsd: number;       // 0.05%
+  dexSwapFeeUsd: number;    // DEX Pool Fees (e.g. 0.06%)
+  gasFeeUsd: number;        // L2 Gas (~$0.02)
+  netProfitUsd: number;
+  txHash: string;
+  gasUsedUnits: number;
+  arkhamEntity: string;
+  arkhamRisk: 'LOW' | 'MEDIUM' | 'HIGH';
+  mempoolBots: number;
+  jevVerdict: 'PROCEED' | 'ABORT';
+  jevConfidence: number;
+  executionLatencyMs: number;
+}
