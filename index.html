@@ -12,6 +12,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      // Ignore benign WebSocket/HMR transport errors in iframe preview environments
+      window.addEventListener('unhandledrejection', function (e) {
+        if (
+          e.reason &&
+          (e.reason.message?.includes?.('WebSocket') ||
+           e.reason.message?.includes?.('ModuleRunner') ||
+           String(e.reason).includes('WebSocket') ||
+           e.reason?.stack?.includes?.('createWebSocketModuleRunnerTransport'))
+        ) {
+          e.preventDefault();
+        }
+      });
+      window.addEventListener('error', function (e) {
+        if (
+          e.message?.includes?.('WebSocket') ||
+          e.filename?.includes?.('@vite/client') ||
+          e.error?.stack?.includes?.('createWebSocketModuleRunnerTransport')
+        ) {
+          e.preventDefault();
+        }
+      });
+    </script>
   </head>
   <body class="bg-slate-950 text-slate-100 antialiased selection:bg-cyan-500/20 selection:text-cyan-200">
     <div id="root"></div>
